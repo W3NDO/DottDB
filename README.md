@@ -9,3 +9,4 @@
 - Afterwards we will attempt to make it fully persistent.
 
 
+[Read the docs](./docs/Intro.md)
