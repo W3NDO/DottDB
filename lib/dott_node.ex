@@ -3,11 +3,11 @@ defmodule DottNode do
   This will define types and behaviours for all the node types
   """
 
-  @typep t :: %__MODULE__{
-           label: String.t(),
-           attributes: Enumerable.t() | nil,
-           meta: list(Enumerable.t())
-         }
+  @type t :: %__MODULE__{
+          label: String.t(),
+          attributes: Enumerable.t() | nil,
+          meta: list(Enumerable.t())
+        }
 
   defstruct label: nil,
             attributes: %{},

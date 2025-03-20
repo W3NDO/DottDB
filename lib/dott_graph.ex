@@ -52,4 +52,29 @@ defmodule DottGraph do
   def info(graph) do
     %{nodes: length(graph.nodes), edges: length(graph.edges)}
   end
+
+  def graph_from_edge_list(graph_name, edge_list, type) do
+    dott_edges =
+      edge_list
+      |> Enum.map(fn
+        [edge_label, src_node, dest_node] ->
+          DottEdge.new(edge_label, src_node, dest_node, %{}, type)
+      end)
+
+    dott_nodes =
+      edge_list
+      |> Enum.map(fn
+        [_edge_label, node_label_1, node_label_2] ->
+          [node_label_1, node_label_2]
+      end)
+      |> List.flatten()
+      |> Enum.uniq()
+      |> Enum.map(fn label -> DottNode.new(label) end)
+
+    %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges}
+  end
+
+  def new_from_file(graph_name, file_path) do
+    File
+  end
 end

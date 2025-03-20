@@ -71,4 +71,45 @@ defmodule DottGraphTest do
 
     assert %{nodes: 2, edges: 2} = DottGraph.info(graph)
   end
+
+  test "Build graph from edge_list" do
+    edge_list = [
+      ["edge_1", "node_1", "node_2"],
+      ["edge_2", "node_2", "node_1"]
+    ]
+
+    assert %DottGraph{
+             edges: [
+               %DottEdge{
+                 attributes: %{},
+                 label: "edge_1",
+                 type: :directed,
+                 src_node_label: "node_1",
+                 dest_node_label: "node_2",
+                 meta: %{read: 0, write: 0}
+               },
+               %DottEdge{
+                 attributes: %{},
+                 label: "edge_2",
+                 type: :directed,
+                 src_node_label: "node_2",
+                 dest_node_label: "node_1",
+                 meta: %{read: 0, write: 0}
+               }
+             ],
+             name: "test graph",
+             nodes: [
+               %DottNode{
+                 attributes: %{},
+                 label: "node_1",
+                 meta: %{read: 0, write: 0}
+               },
+               %DottNode{
+                 attributes: %{},
+                 label: "node_2",
+                 meta: %{read: 0, write: 0}
+               }
+             ]
+           } == DottGraph.graph_from_edge_list("test graph", edge_list, :directed)
+  end
 end
