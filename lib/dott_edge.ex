@@ -5,24 +5,44 @@ defmodule DottEdge do
 
   @type t :: %__MODULE__{
           label: String.t(),
-          type: String.t(),
-          nodes: Enumerable.t(),
+          type: Atom.t(),
+          src_node_label: String.t(),
+          dest_node_label: String.t(),
           attributes: Enumerable.t() | nil
         }
 
   defstruct label: nil,
-            nodes: [],
+            src_node_label: nil,
+            dest_node_label: nil,
             type: nil,
             attributes: %{}
 
-  @callback new(label :: String.t(), nodes :: Enumerable.t(), attributes :: Enumerable.t()) ::
+  @callback new(
+              label :: String.t(),
+              src_node_label :: String.t(),
+              dest_node_label :: String.t(),
+              type :: String.t(),
+              attributes :: Enumerable.t()
+            ) ::
               struct()
 
-  def new(nil, _nodes, _attributes) do
-    raise "Edge label must be present"
+  def new(nil, _src, _dest, _nodes, _attributes) do
+    raise ArgumentError, message: "Edge label must be present"
   end
 
-  def new(label, nodes, attributes \\ %{}) do
-    %DottEdge{label: label, nodes: nodes, attributes: attributes}
+  def new(label, src_node_label, dest_node_label),
+    do: new(label, src_node_label, dest_node_label, %{}, :undirected)
+
+  def new(label, src_node_label, dest_node_label, attributes),
+    do: new(label, src_node_label, dest_node_label, attributes, :undirected)
+
+  def new(label, src_node_label, dest_node_label, attributes, type) do
+    %DottEdge{
+      label: label,
+      src_node_label: src_node_label,
+      dest_node_label: dest_node_label,
+      type: type,
+      attributes: attributes
+    }
   end
 end

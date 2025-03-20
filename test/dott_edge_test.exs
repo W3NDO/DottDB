@@ -3,11 +3,17 @@ defmodule DottEdgeTest do
   doctest DottEdge
 
   test "creates a new edge" do
-    assert %DottEdge{label: "Edge", nodes: [], attributes: %{}, type: nil} ==
-             DottEdge.new("Edge", [])
+    assert %DottEdge{
+             label: "Edge",
+             src_node_label: "first",
+             dest_node_label: "second",
+             attributes: %{},
+             type: :undirected
+           } ==
+             DottEdge.new("Edge", "first", "second")
   end
 
   test "fails to create a new edge if label is not provided" do
-    assert_raise(RuntimeError, fn -> DottEdge.new(nil, []) end)
+    assert_raise(ArgumentError, fn -> DottEdge.new(nil, nil, nil, nil, nil) end)
   end
 end

@@ -21,3 +21,7 @@ dott_db-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# ASDF generates .tool_versions when setting which tools to use. Lets ignore that too
+.tool_versions
+

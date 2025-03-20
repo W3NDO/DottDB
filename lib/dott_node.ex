@@ -11,10 +11,9 @@ defmodule DottNode do
   defstruct label: nil,
             attributes: %{}
 
-  @callback new(label :: String.t()) :: struct()
-
+  @spec new(label :: String.t()) :: struct()
   def new(nil, _attributes) do
-    raise("Node label must be present")
+    raise ArgumentError, message: "Node label must be present"
   end
 
   def new(label, attributes \\ %{}) do

@@ -7,7 +7,7 @@ defmodule DottNodeTest do
   end
 
   test "Raises an error, if no label is provided as the node label" do
-    assert_raise(RuntimeError, fn -> DottNode.new(nil) end)
+    assert_raise(ArgumentError, fn -> DottNode.new(nil) end)
   end
 
   test "takes in extra attributes if they are provided" do
