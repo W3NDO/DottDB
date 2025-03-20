@@ -3,13 +3,15 @@ defmodule DottNode do
   This will define types and behaviours for all the node types
   """
 
-  @type t :: %__MODULE__{
-          label: String.t(),
-          attributes: Enumerable.t() | nil
-        }
+  @typep t :: %__MODULE__{
+           label: String.t(),
+           attributes: Enumerable.t() | nil,
+           meta: list(Enumerable.t())
+         }
 
   defstruct label: nil,
-            attributes: %{}
+            attributes: %{},
+            meta: %{}
 
   @spec new(label :: String.t()) :: struct()
   def new(nil, _attributes) do
@@ -17,6 +19,6 @@ defmodule DottNode do
   end
 
   def new(label, attributes \\ %{}) do
-    %DottNode{label: label, attributes: attributes}
+    %DottNode{label: label, attributes: attributes, meta: %{read: 0, write: 0}}
   end
 end

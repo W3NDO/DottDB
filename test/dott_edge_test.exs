@@ -8,7 +8,8 @@ defmodule DottEdgeTest do
              src_node_label: "first",
              dest_node_label: "second",
              attributes: %{},
-             type: :undirected
+             type: :undirected,
+             meta: %{read: 0, write: 0}
            } ==
              DottEdge.new("Edge", "first", "second")
   end

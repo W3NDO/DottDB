@@ -8,14 +8,16 @@ defmodule DottEdge do
           type: Atom.t(),
           src_node_label: String.t(),
           dest_node_label: String.t(),
-          attributes: Enumerable.t() | nil
+          attributes: Enumerable.t() | nil,
+          meta: Enumerable.t()
         }
 
   defstruct label: nil,
             src_node_label: nil,
             dest_node_label: nil,
             type: nil,
-            attributes: %{}
+            attributes: %{},
+            meta: %{}
 
   @callback new(
               label :: String.t(),
@@ -42,7 +44,8 @@ defmodule DottEdge do
       src_node_label: src_node_label,
       dest_node_label: dest_node_label,
       type: type,
-      attributes: attributes
+      attributes: attributes,
+      meta: %{read: 0, write: 0}
     }
   end
 end

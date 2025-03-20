@@ -20,8 +20,6 @@ defmodule DottGraph do
     raise ArgumentError, "Graph name, nodes list, and edge list must be present"
   end
 
-  # When creating a new graph, I think we should have the option of providing the list of nodes as a list of
-  # a 2 tuple [label, attribute] and the list of edges as a list of a 5 tuple [label, src_node, dest_node, type, attributes ]
   def new(graph_name, nodes, edges) do
     dott_nodes =
       nodes

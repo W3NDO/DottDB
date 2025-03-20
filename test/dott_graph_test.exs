@@ -10,20 +10,30 @@ defmodule DottGraphTest do
                  label: "edge_1",
                  type: :directed,
                  src_node_label: "node_1",
-                 dest_node_label: "node_2"
+                 dest_node_label: "node_2",
+                 meta: %{read: 0, write: 0}
                },
                %DottEdge{
                  attributes: %{weight: 10},
                  label: "edge_2",
                  type: :directed,
                  src_node_label: "node_2",
-                 dest_node_label: "node_1"
+                 dest_node_label: "node_1",
+                 meta: %{read: 0, write: 0}
                }
              ],
              name: "test graph",
              nodes: [
-               %DottNode{attributes: %{attr1: "attr1"}, label: "node_1"},
-               %DottNode{attributes: %{attr1: "attr1"}, label: "node_2"}
+               %DottNode{
+                 attributes: %{attr1: "attr1"},
+                 label: "node_1",
+                 meta: %{read: 0, write: 0}
+               },
+               %DottNode{
+                 attributes: %{attr1: "attr1"},
+                 label: "node_2",
+                 meta: %{read: 0, write: 0}
+               }
              ]
            } ==
              DottGraph.new(
