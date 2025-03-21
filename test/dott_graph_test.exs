@@ -59,17 +59,17 @@ defmodule DottGraphTest do
   end
 
   test "Gets information on the graph" do
-    graph =
-      DottGraph.new(
-        "test graph",
-        [["node_1", %{attr1: "attr1"}], ["node_2", %{attr1: "attr1"}]],
-        [
-          ["edge_1", "node_1", "node_2", %{weight: 10}, :directed],
-          ["edge_2", "node_2", "node_1", %{weight: 10}, :directed]
-        ]
-      )
-
-    assert %{nodes: 2, edges: 2} = DottGraph.info(graph)
+    assert %{nodes: 2, edges: 2} =
+             DottGraph.info(
+               DottGraph.new(
+                 "test graph",
+                 [["node_1", %{attr1: "attr1"}], ["node_2", %{attr1: "attr1"}]],
+                 [
+                   ["edge_1", "node_1", "node_2", %{weight: 10}, :directed],
+                   ["edge_2", "node_2", "node_1", %{weight: 10}, :directed]
+                 ]
+               )
+             )
   end
 
   test "Build graph from edge_list" do
