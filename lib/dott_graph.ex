@@ -2,6 +2,7 @@ defmodule DottGraph do
   @moduledoc """
   Defines types and behaviours for the graph object
   """
+  @filetypes ["csv", "json"]
 
   @type t :: %__MODULE__{
           name: String.t(),
@@ -13,9 +14,6 @@ defmodule DottGraph do
   defstruct name: nil,
             nodes: [],
             edges: []
-
-  @spec filetypes :: Enumerable.t()
-  def filetypes, do: ["csv", "json"]
 
   @spec new(name :: String.t(), nodes :: list(DottNode.t()), edges :: list(DottEdge.t())) ::
           struct()
@@ -184,52 +182,5 @@ defmodule DottGraph do
     %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges}
   end
 
-  @spec graph_from_edge_list_file(graph_name :: String.t(), path :: Path.t()) :: struct()
-  def graph_from_edge_list_file(graph_name, path) do
-    # check if the file exists
-    contents =
-      case File.stream!(path) do
-        {:error, :enoent} ->
-          raise File.Error, reason: :enoent, actoin: "open", path: "#{path}"
 
-        {:ok, contents} ->
-          contents
-      end
-
-    # check the file type. For now we will only support CSV & JSON files.
-    extension =
-      path
-      |> String.split(".")
-      |> tl()
-
-    parsed_content =
-      with true <- Enum.member?(Constants.filetypes(), extension),
-           {:ok, [nodes, edges]} <- parse_file(extension, contents) do
-        [nodes, edges]
-      else
-        false -> raise Errors.FiletypeError, "Invalid file type: #{extension}"
-        {:error, reason} -> raise "File parsing failed: #{reason}"
-      end
-
-    %DottGraph{name: graph_name, nodes: hd(parsed_content), edges: tl(parsed_content)}
-  end
-
-  defp parse_file("csv", contents), do: {:ok, load_from_csv(contents)}
-  defp parse_file("json", contents), do: {:ok, load_from_json(contents)}
-  defp parse_file(_, _), do: {:error, "Unsupported file type"}
-
-  @spec load_from_csv(binary()) :: Enumerable.t()
-  def load_from_csv(file_contents) do
-    data =
-      file_contents
-      |> CSV.decode(headers: true)
-      |> Enum.take(10)
-      |> hd()
-
-    data
-  end
-
-  @spec load_from_json(binary()) :: Enumerable.t()
-  defp load_from_json(file_contents) do
-  end
 end
