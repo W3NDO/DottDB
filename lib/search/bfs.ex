@@ -6,11 +6,14 @@ defmodule Search.Bfs do
   @spec bfs_search(graph :: DottGraph.t(), source :: String.t(), destination :: String.t()) ::
           list(Enumerable.t())
   def bfs_search(graph, source, destination) do
-
     node_labels = Enum.map(graph.nodes, & &1.label)
+
     unless source in node_labels,
-      do: raise Errors.NodeMissingError
+      do: raise(Errors.NodeMissingError)
+
     unless destination in node_labels,
-      do: raise Errors.NodeMissingError
+      do: raise(Errors.NodeMissingError)
+
+    []
   end
 end
