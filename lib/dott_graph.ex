@@ -116,8 +116,9 @@ defmodule DottGraph do
     %{nodes: 2, edges: 2}
   """
 
+  @spec info(graph :: t()) :: %{:key => integer()}
   def info(graph) do
-    %{nodes: length(graph.nodes), edges: length(graph.edges)}
+    %{:nodes => length(graph.nodes), :edges => length(graph.edges)}
   end
 
   @doc """
@@ -181,6 +182,4 @@ defmodule DottGraph do
 
     %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges}
   end
-
-
 end
