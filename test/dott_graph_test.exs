@@ -36,7 +36,10 @@ defmodule DottGraphTest do
                    meta: %{read: 0, write: 0}
                  }
                ],
-               triples: []
+               triples: [
+                 %Types.Triples{subject: "node_1", predicate: "edge_1", object: "node_2"},
+                 %Types.Triples{subject: "node_2", predicate: "edge_2", object: "node_1"}
+               ]
              } ==
                DottGraph.new(
                  "test graph",
@@ -115,6 +118,10 @@ defmodule DottGraphTest do
                    label: "node_2",
                    meta: %{read: 0, write: 0}
                  }
+               ],
+               triples: [
+                 %Types.Triples{subject: "node_1", predicate: "edge_1", object: "node_2"},
+                 %Types.Triples{subject: "node_2", predicate: "edge_2", object: "node_1"}
                ]
              } == DottGraph.graph_from_edge_list("test graph", edge_list, :directed)
     end
@@ -140,8 +147,20 @@ defmodule DottGraphTest do
                triples: [
                  %Types.Triples{subject: :alice, predicate: :knows, object: :bob}
                ],
-               nodes: [],
-               edges: []
+               nodes: [
+                 %DottNode{attributes: %{}, label: :alice, meta: %{read: 0, write: 0}},
+                 %DottNode{attributes: %{}, label: :bob, meta: %{read: 0, write: 0}}
+               ],
+               edges: [
+                 %DottEdge{
+                   attributes: %{},
+                   label: :knows,
+                   meta: %{read: 0, write: 0},
+                   type: :undirected,
+                   src_node_label: :alice,
+                   dest_node_label: :bob
+                 }
+               ]
              } == DottGraph.new("test graph", [:alice, :knows, :bob])
     end
   end
