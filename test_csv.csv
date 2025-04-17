@@ -1,0 +1,3 @@
+edge_label,src,dest
+edge_1,node_1,node_2
+edge_2,node_2,node_1

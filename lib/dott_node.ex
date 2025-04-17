@@ -4,26 +4,23 @@ defmodule DottNode do
   """
 
   @type t :: %__MODULE__{
-           label: String.t(),
-           attributes: Enumerable.t() | nil,
-           meta: list(Enumerable.t())
-         }
+          label: String.t(),
+          attributes: Enumerable.t() | nil,
+          meta: list(Enumerable.t())
+        }
 
   defstruct label: nil,
             attributes: %{},
             meta: %{}
 
-  @spec new(label :: String.t(), attributes :: Enumerable.t() | nil) :: %DottNode{
-          attributes: Enumerable.t(),
-          label: String.t(),
-          meta: %{read: 0, write: 0}
-        }
+  @spec new(label :: String.t()) :: t()
+  def new(label), do: new(label, %{})
+
   def new(nil, _attributes) do
     raise ArgumentError, message: "Node label must be present"
   end
 
-  def new(label), do: new(label, %{})
-
+  @spec new(label :: String.t(), attributes :: Enumerable.t()) :: t()
   def new(label, attributes) do
     %DottNode{label: label, attributes: attributes, meta: %{read: 0, write: 0}}
   end
