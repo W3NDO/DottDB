@@ -122,21 +122,60 @@ defmodule DottGraphTest do
 
   describe "new/2 :: Build a graph with triples" do
     test "accepts a list of triples and builds the graph with triples" do
-      assert %DottGraph{
-               name: "test graph",
-               triples: [[:alice, "knows", :bob], [:bob, :knows, :alice]],
-               nodes: [],
-               edges: []
-             } == DottGraph.new("test graph", [[:alice, "knows", :bob], [:bob, :knows, :alice]])
+      expected_triples = [
+        %Types.Triples{subject: :alice, predicate: "knows", object: :bob},
+        %Types.Triples{subject: :bob, predicate: :knows, object: :alice}
+      ]
+
+      graph = DottGraph.new("test graph", [[:alice, "knows", :bob], [:bob, :knows, :alice]])
+      actual_triples = graph.triples
+
+      assert true =
+               Enum.all?(actual_triples, fn triple -> Enum.member?(expected_triples, triple) end)
     end
 
     test "Accepts a single triple and builds a graph with that as the triples" do
       assert %DottGraph{
                name: "test graph",
-               triples: [:alice, :knows, :bob],
+               triples: [
+                 %Types.Triples{subject: :alice, predicate: :knows, object: :bob}
+               ],
                nodes: [],
                edges: []
              } == DottGraph.new("test graph", [:alice, :knows, :bob])
+    end
+  end
+
+  describe "Adding triples to the graph" do
+    test "add_triples/2 with one set of triples" do
+      graph = DottGraph.new("test graph", [:alice, :knows, :bob])
+
+      expected_triples = [
+        %Types.Triples{subject: :alice, predicate: :knows, object: :bob},
+        %Types.Triples{subject: :bob, predicate: :knows, object: :alice}
+      ]
+
+      DottGraph.add_triples(graph, [:bob, :knows, :alice])
+      actual_triples = graph.triples
+
+      assert true =
+               Enum.all?(actual_triples, fn triple -> Enum.member?(expected_triples, triple) end)
+    end
+
+    test "add_triples/2 with multiple set of triples" do
+      graph = DottGraph.new("test graph", [:alice, :knows, :bob])
+
+      expected_triples = [
+        %Types.Triples{subject: :john, predicate: :knows, object: :alice},
+        %Types.Triples{subject: :alice, predicate: :knows, object: :bob},
+        %Types.Triples{subject: :bob, predicate: :knows, object: :alice}
+      ]
+
+      DottGraph.add_triples(graph, [[:bob, :knows, :alice], [:john, :knows, :alice]])
+      actual_triples = graph.triples
+
+      assert true =
+               Enum.all?(actual_triples, fn triple -> Enum.member?(expected_triples, triple) end)
     end
   end
 end
