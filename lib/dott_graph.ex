@@ -2,21 +2,58 @@ defmodule DottGraph do
   @moduledoc """
   Defines types and behaviours for the graph object
   """
-  @filetypes ["csv", "json"]
+  alias Types.Triples
+  # @filetypes ["csv", "json"]
+
+  @type triple_arg :: {
+          subject :: String.t() | atom(),
+          predicate :: String.t() | atom(),
+          object :: String.t() | atom()
+        }
 
   @type t :: %__MODULE__{
           name: String.t(),
-          nodes: list(DottNode.t()),
-          edges: list(DottEdge.t())
+          nodes: list(DottNode.t()) | nil,
+          edges: list(DottEdge.t()) | nil,
+          triples: list(Triples.t()) | nil
         }
 
   @enforce_keys [:nodes, :edges]
   defstruct name: nil,
             nodes: [],
-            edges: []
+            edges: [],
+            triples: []
+
+  @doc """
+    DottGraph.new/2 will take in a graph name and a triple or a list of triples and return a graph with those triples.
+
+    ## Examples
+
+    iex> DottGraph.new(
+    ...>      "test graph",
+    ...>      [:alice, :knows, :bob]
+    ...>    )
+
+    %DottGraph{
+      name: "test graph",
+      triples: [:alice, :knows, :bob],
+      nodes: [],
+      edges: []
+    }
+
+  """
+  @spec new(name :: String.t(), triples :: list(triple_arg) | triple_arg) :: %DottGraph{}
+  def new(name, triple) do
+    %__MODULE__{
+      name: name,
+      triples: triple,
+      nodes: [],
+      edges: []
+    }
+  end
 
   @spec new(name :: String.t(), nodes :: list(DottNode.t()), edges :: list(DottEdge.t())) ::
-          struct()
+          %DottGraph{}
   def new(name, nodes, edges) when is_nil(name) or is_nil(nodes) or is_nil(edges) do
     raise ArgumentError, "Graph name, nodes list, and edge list must be present"
   end
@@ -68,7 +105,8 @@ defmodule DottGraph do
           label: "node_2",
           meta: %{read: 0, write: 0}
         }
-      ]
+      ],
+      triples: []
     }
   """
   def new(graph_name, nodes, edges) do
@@ -181,6 +219,4 @@ defmodule DottGraph do
 
     %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges}
   end
-
-
 end
