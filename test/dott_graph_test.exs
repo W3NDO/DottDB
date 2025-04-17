@@ -2,7 +2,7 @@ defmodule DottGraphTest do
   use ExUnit.Case
   doctest DottGraph
 
-  describe "Building a graph object" do
+  describe "Building a graph object with nodes & edges (new/3)" do
     test "Creates a new DottGraph object" do
       assert %DottGraph{
                edges: [
@@ -35,7 +35,8 @@ defmodule DottGraphTest do
                    label: "node_2",
                    meta: %{read: 0, write: 0}
                  }
-               ]
+               ],
+               triples: []
              } ==
                DottGraph.new(
                  "test graph",
@@ -116,6 +117,26 @@ defmodule DottGraphTest do
                  }
                ]
              } == DottGraph.graph_from_edge_list("test graph", edge_list, :directed)
+    end
+  end
+
+  describe "new/2 :: Build a graph with triples" do
+    test "accepts a list of triples and builds the graph with triples" do
+      assert %DottGraph{
+               name: "test graph",
+               triples: [[:alice, "knows", :bob], [:bob, :knows, :alice]],
+               nodes: [],
+               edges: []
+             } == DottGraph.new("test graph", [[:alice, "knows", :bob], [:bob, :knows, :alice]])
+    end
+
+    test "Accepts a single triple and builds a graph with that as the triples" do
+      assert %DottGraph{
+               name: "test graph",
+               triples: [:alice, :knows, :bob],
+               nodes: [],
+               edges: []
+             } == DottGraph.new("test graph", [:alice, :knows, :bob])
     end
   end
 end
