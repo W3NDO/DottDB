@@ -1,5 +1,4 @@
 defmodule Query do
-  alias Types.Triples
 
   @doc """
   This module holds the control logic for processing queries.
@@ -22,15 +21,13 @@ defmodule Query do
            object :: literal | variable}
 
   def query(graph, pattern) do
+    pattern = normalize_pattern(pattern)
     res = Enum.filter(graph.triples, fn triple -> match_pattern?(triple, pattern) end)
 
     case res do
       [] -> {:no_results, []}
       _ -> {:ok, res}
     end
-  end
-
-  defp triple_filter?(triple, pattern) do
   end
 
   # when a variable is used in a pattern it is converted into a variable type
@@ -51,16 +48,14 @@ defmodule Query do
     end
   end
 
-  defp subject_filter?(%Triples{subject: s}, [s, _, _]), do: true
-  defp predicate_filter?(%Triples{predicate: p}, [_, p, _]), do: true
-  defp object_filter?(%Triples{object: o}, [_, _, o]), do: true
+  def has_variable?([s,p,o]) do
+    case [s,p,o] do
+      [%Types.PatternVariable{var: _s}, _, _] -> true
+      [_, %Types.PatternVariable{var: _s}, _] -> true
+      [_, _, %Types.PatternVariable{var: _s}] -> true
+      _ -> false
+    end
+  end
 
-  defp match_pattern?(%Triples{subject: s, predicate: p, object: o}, [s, p, o]), do: true
-  defp match_pattern?(%Triples{subject: s, predicate: p}, [s, p, _]), do: true
-  defp match_pattern?(%Triples{subject: s, object: o}, [s, _, o]), do: true
-  defp match_pattern?(%Triples{object: o, predicate: p}, [_, p, o]), do: true
-  defp match_pattern?(%Triples{subject: s}, [s, _, _]), do: true
-  defp match_pattern?(%Triples{predicate: p}, [_, p, _]), do: true
-  defp match_pattern?(%Triples{object: o}, [_, _, o]), do: true
-  defp match_pattern?(_, _), do: false
+  def match_pattern?(), do: true
 end
