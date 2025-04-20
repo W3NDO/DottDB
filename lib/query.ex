@@ -57,5 +57,5 @@ defmodule Query do
     end
   end
 
-  def match_pattern?(), do: true
+  def match_pattern?(_, _), do: true
 end
