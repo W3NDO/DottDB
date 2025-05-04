@@ -1,5 +1,4 @@
 defmodule Query do
-
   @doc """
   This module holds the control logic for processing queries.
 
@@ -22,7 +21,11 @@ defmodule Query do
 
   def query(graph, pattern) do
     pattern = normalize_pattern(pattern)
-    res = Enum.filter(graph.triples, fn triple -> match_pattern?(triple, pattern) end)
+
+    res =
+      Enum.filter(graph.triples, fn triple ->
+        match?({:ok, _}, match_pattern?(triple, pattern))
+      end)
 
     case res do
       [] -> {:no_results, []}
@@ -48,8 +51,8 @@ defmodule Query do
     end
   end
 
-  def has_variable?([s,p,o]) do
-    case [s,p,o] do
+  def has_variable?([s, p, o]) do
+    case [s, p, o] do
       [%Types.PatternVariable{var: _s}, _, _] -> true
       [_, %Types.PatternVariable{var: _s}, _] -> true
       [_, _, %Types.PatternVariable{var: _s}] -> true
@@ -57,17 +60,41 @@ defmodule Query do
     end
   end
 
-  def match_pattern?([g_subject, g_predicate, g_object], [p_subect, p_predictae, p_object]) do
-    Enum.zip([g_subject, g_predicate, g_object], [p_subect, p_predictae, p_object])
-    |> Enum.map(fn {graph_elem, pattern_elem} ->
-      cond do
-        graph_elem == pattern_elem ->
-          [true, [graph_elem, pattern_elem]]
-        Types.PatternVariable.is_pattern_variable?(pattern_elem) && is_atom(graph_elem) == true ->
-          [true, [graph_elem, pattern_elem.var]]
-        true ->
-          [false, [graph_elem, pattern_elem]]
+  @spec match_pattern?(%Types.Triples{}, list()) :: {:no_match, []} | {:ok, list()}
+  def match_pattern?(
+        %Types.Triples{subject: g_subject, predicate: g_predicate, object: g_object},
+        [p_subect, p_predictae, p_object]
+      ) do
+    matches =
+      Enum.zip([g_subject, g_predicate, g_object], [p_subect, p_predictae, p_object])
+      |> Enum.map(fn {graph_elem, pattern_elem} ->
+        cond do
+          graph_elem == pattern_elem ->
+            [true, [graph_elem, pattern_elem]]
+
+          Types.PatternVariable.is_pattern_variable?(pattern_elem) && is_atom(graph_elem) == true ->
+            [true, [graph_elem, pattern_elem.var]]
+
+          true ->
+            [false, [graph_elem, pattern_elem]]
+        end
+      end)
+
+    res = Enum.map(matches, fn entry -> hd(entry) end) |> Enum.all?()
+
+    assignments =
+      if res == true do
+        Enum.map(matches, fn [_, maps] -> maps end)
+      else
+        []
       end
-    end)
+
+    case res do
+      true ->
+        {:ok, assignments}
+
+      _ ->
+        {:no_match, []}
+    end
   end
 end

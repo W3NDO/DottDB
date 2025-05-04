@@ -25,7 +25,7 @@ defmodule QueryTest do
   describe "Patterns using the variable type and literals" do
     test "use two blanks and a literal", %{graph: graph} do
       assert {:ok, [%Types.Triples{subject: :anna, predicate: :knows, object: :camille}]} =
-               Query.query(graph, [:anna, :blank, :blank])
+               Query.query(graph, [:anna, :__var, :__var])
     end
   end
 end
