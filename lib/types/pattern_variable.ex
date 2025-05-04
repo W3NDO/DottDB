@@ -4,4 +4,7 @@ defmodule Types.PatternVariable do
         }
 
   defstruct [:var]
+
+  def is_pattern_variable?(%Types.PatternVariable{var: _}), do: true
+  def is_pattern_variable?(_), do: false
 end

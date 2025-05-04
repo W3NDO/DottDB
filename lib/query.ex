@@ -32,7 +32,7 @@ defmodule Query do
 
   # when a variable is used in a pattern it is converted into a variable type
   # This means that :__var becomes %Types.PatternVariable{var: :__var}
-  defp normalize_pattern(pattern) do
+  def normalize_pattern(pattern) do
     Enum.map(pattern, fn part ->
       case is_user_variable?(part) do
         true -> %Types.PatternVariable{var: part}
@@ -57,5 +57,17 @@ defmodule Query do
     end
   end
 
-  def match_pattern?(_, _), do: true
+  def match_pattern?([g_subject, g_predicate, g_object], [p_subect, p_predictae, p_object]) do
+    Enum.zip([g_subject, g_predicate, g_object], [p_subect, p_predictae, p_object])
+    |> Enum.map(fn {graph_elem, pattern_elem} ->
+      cond do
+        graph_elem == pattern_elem ->
+          [true, [graph_elem, pattern_elem]]
+        Types.PatternVariable.is_pattern_variable?(pattern_elem) && is_atom(graph_elem) == true ->
+          [true, [graph_elem, pattern_elem.var]]
+        true ->
+          [false, [graph_elem, pattern_elem]]
+      end
+    end)
+  end
 end
