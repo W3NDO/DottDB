@@ -19,6 +19,8 @@ defmodule Query do
           {subject :: literal | variable, predicate :: literal | variable,
            object :: literal | variable}
 
+  @spec query(DottGraph.t(), pattern | Types.Query.t()) ::
+          {:ok, list(Types.Triples)} | {:no_results, []}
   def query(graph, pattern) do
     pattern = normalize_pattern(pattern)
 
