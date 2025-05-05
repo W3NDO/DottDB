@@ -1,4 +1,6 @@
 defmodule Query do
+  alias Types.Query
+
   @doc """
   This module holds the control logic for processing queries.
 
@@ -22,7 +24,7 @@ defmodule Query do
   @spec query(DottGraph.t(), pattern | Types.Query.t()) ::
           {:ok, list(Types.Triples)} | {:no_results, []}
   def query(graph, pattern) do
-    pattern = normalize_pattern(pattern)
+    pattern = Query.normalize_pattern(pattern)
 
     res =
       Enum.filter(graph.triples, fn triple ->
@@ -37,21 +39,6 @@ defmodule Query do
 
   # when a variable is used in a pattern it is converted into a variable type
   # This means that :__var becomes %Types.PatternVariable{var: :__var}
-  def normalize_pattern(pattern) do
-    Enum.map(pattern, fn part ->
-      case is_user_variable?(part) do
-        true -> %Types.PatternVariable{var: part}
-        false -> part
-      end
-    end)
-  end
-
-  defp is_user_variable?(part) do
-    case is_atom(part) and String.starts_with?(Atom.to_string(part), "__") do
-      false -> false
-      true -> true
-    end
-  end
 
   def has_variable?([s, p, o]) do
     case [s, p, o] do
