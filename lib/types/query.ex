@@ -14,9 +14,9 @@ defmodule Types.Query do
 
   # note that here we use the word 'oder' not order as a variable because it is the german word for or.
   # or is a keyword. so we can't use it as a variable
+  # A find will match an atom on any position in an empty where pattern. (all the elements in the pattern are variables)
 
   @spec find(atom() | list(atom())) :: Types.Query.t()
-  # A find will match an atom on any position in an empty where pattern. (all the elements in the pattern are variables)
   def find(find),
     do: %__MODULE__{
       find: find,

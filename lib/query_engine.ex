@@ -1,4 +1,4 @@
-defmodule Query do
+defmodule QueryEngine do
   alias Types.Query
 
   @doc """
