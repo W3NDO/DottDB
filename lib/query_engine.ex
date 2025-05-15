@@ -27,8 +27,7 @@ defmodule QueryEngine do
     case Query.is_query_struct?(pattern) do
       true ->
         # figure out the find first
-        find_clause = pattern.find
-        res = find_match(graph, %{}, find_clause)
+        res = match_on_query_struct(graph, pattern)
 
         case Enum.empty?(res) do
           true -> {:no_results, []}
@@ -99,6 +98,28 @@ defmodule QueryEngine do
         {:no_match, []}
     end
   end
+
+  @spec match_on_query_struct(graph :: DottGraph, query :: Types.Query) :: list(Types.Triples) | nil
+  def match_on_query_struct(graph, %Types.Query{find: find_clause, where: nil, where_not: nil, or: nil}) do
+    find_match(graph, %{}, find_clause)
+  end
+
+  def match_on_query_struct(graph, %Types.Query{find: find_clause, where: where_clause, where_not: nil, or: nil}) do
+    IO.inspect(3)
+    nil
+  end
+
+  def match_on_query_struct(graph, %Types.Query{find: find_clause, where: nil, where_not: where_not_clause, or: nil}) do
+    IO.inspect(2)
+    nil
+  end
+
+  def match_on_query_struct(graph, %Types.Query{find: find_clause, where: where_clause, where_not: where_not_clause, or: or_clause}) do
+    IO.inspect(1)
+    nil
+  end
+
+
 
   def find_match(_graph, matches, []) do
     matches

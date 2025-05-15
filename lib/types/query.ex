@@ -20,11 +20,7 @@ defmodule Types.Query do
   def find(find),
     do: %__MODULE__{
       find: find,
-      where: %Types.Triples{
-        subject: %Types.PatternVariable{var: :__var1},
-        predicate: %Types.PatternVariable{var: :__var2},
-        object: %Types.PatternVariable{var: :__var3}
-      },
+      where: nil,
       where_not: nil,
       or: nil
     }

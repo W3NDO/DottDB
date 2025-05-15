@@ -86,6 +86,19 @@ defmodule QueryEngineTest do
     end
 
     @tag :skip
+    test "find variables" do
+      query = Query.find(:__any_var)
+
+      assert {:ok,
+              [
+                %Types.Triples{subject: :anna, predicate: :lives_with, object: :bob},
+                %Types.Triples{subject: :camille, predicate: :works_with, object: :bob},
+                %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
+                %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
+              ]}
+    end
+
+    @tag :skip
     test "find triples containing :anna where [:anna, :knows, :camille] ", %{graph: graph} do
       query =
         Query.find_where(:anna, %Types.Triples{
