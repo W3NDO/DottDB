@@ -50,25 +50,53 @@ defmodule QueryEngineTest do
   end
 
   describe "Queries using query structs" do
-    @tag :skip
-    test "find who camille knows and who camille works with", %{graph: graph} do
-      query = %Types.Query{
-        find: [:__person_b, :__person_c],
-        where: [
-          [:camille, :knows, :__person_b],
-          [:camille, :works_with, :__person_c]
-        ]
-      }
-
-      query = Query.find_where([:__person_b, :__person_c], [
-        [:camille, :knows, :__person_b],
-        [:camille, :works_with, :__person_c]
-      ])
+    test "find triples containing :anna", %{graph: graph} do
+      query = Query.find(:anna)
 
       assert {:ok,
               [
-                %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
-                %Types.Triples{subject: :camille, predicate: :works_with, object: :bob}
+                %{
+                  anna: [
+                    %Types.Triples{subject: :anna, predicate: :lives_with, object: :bob},
+                    %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
+                    %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
+                  ]
+                }
+              ]} == QueryEngine.query(graph, query)
+    end
+
+    test "find triples containing :anna and :camille", %{graph: graph} do
+      query = Query.find([:anna, :camille])
+
+      assert {:ok,
+              [
+                %{
+                  anna: [
+                    %Types.Triples{subject: :anna, predicate: :lives_with, object: :bob},
+                    %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
+                    %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
+                  ],
+                  camille: [
+                    %Types.Triples{subject: :camille, predicate: :works_with, object: :bob},
+                    %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
+                    %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
+                  ]
+                }
+              ]} == QueryEngine.query(graph, query)
+    end
+
+    @tag :skip
+    test "find triples containing :anna where [:anna, :knows, :camille] ", %{graph: graph} do
+      query =
+        Query.find_where(:anna, %Types.Triples{
+          subject: :anna,
+          predicate: :knows,
+          object: :camille
+        })
+
+      assert {:ok,
+              [
+                %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
               ]} == QueryEngine.query(graph, query)
     end
   end

@@ -24,16 +24,29 @@ defmodule QueryEngine do
   @spec query(DottGraph.t(), pattern | Types.Query.t()) ::
           {:ok, list(Types.Triples)} | {:no_results, []}
   def query(graph, pattern) do
-    pattern = Query.normalize_pattern(pattern)
+    case Query.is_query_struct?(pattern) do
+      true ->
+        # figure out the find first
+        find_clause = pattern.find
+        res = find_match(graph, %{}, find_clause)
 
-    res =
-      Enum.filter(graph.triples, fn triple ->
-        match?({:ok, _}, match_pattern?(triple, pattern))
-      end)
+        case Enum.empty?(res) do
+          true -> {:no_results, []}
+          false -> {:ok, [res]}
+        end
 
-    case res do
-      [] -> {:no_results, []}
-      _ -> {:ok, res}
+      false ->
+        pattern = Query.normalize_pattern(pattern)
+
+        res =
+          Enum.filter(graph.triples, fn triple ->
+            match?({:ok, _}, match_pattern?(triple, pattern))
+          end)
+
+        case res do
+          [] -> {:no_results, []}
+          _ -> {:ok, res}
+        end
     end
   end
 
@@ -85,5 +98,26 @@ defmodule QueryEngine do
       _ ->
         {:no_match, []}
     end
+  end
+
+  def find_match(_graph, matches, []) do
+    matches
+  end
+
+  def find_match(graph, matches, [head | other_find_clauses]) do
+    new_matches = find_match(graph, matches, head)
+    find_match(graph, new_matches, other_find_clauses)
+  end
+
+  def find_match(graph, matches, find_clause) do
+    Map.put(
+      matches,
+      find_clause,
+      Enum.filter(graph.triples, fn triple -> Types.Triples.has_value?(triple, find_clause) end)
+    )
+  end
+
+  def where_match(graph, patterns) do
+    match_pattern?(graph.triples, patterns)
   end
 end

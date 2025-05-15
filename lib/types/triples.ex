@@ -25,4 +25,21 @@ defmodule Types.Triples do
       object: object
     }
   end
+
+  @spec has_value?(triple :: t(), value :: atom()) :: boolean()
+  def has_value?(%{subject: s, predicate: p, object: o}, value) do
+    cond do
+      s == value ->
+        true
+
+      p == value ->
+        true
+
+      o == value ->
+        true
+
+      true ->
+        false
+    end
+  end
 end

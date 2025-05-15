@@ -109,4 +109,16 @@ defmodule Types.Query do
       object: o
     }
   end
+
+  def is_query_struct?(query) do
+    case is_map(query) do
+      false ->
+        false
+
+      true ->
+        keys = [:find, :where, :where_not, :or]
+
+        Enum.all?(keys, fn key -> Map.has_key?(query, key) end)
+    end
+  end
 end
