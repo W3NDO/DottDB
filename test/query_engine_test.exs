@@ -73,8 +73,9 @@ defmodule QueryEngineTest do
               ]} == QueryEngine.query(graph, query)
     end
 
-    test "find variables" do
+    test "find variable", %{graph: graph} do
       query = Query.find(:__any_var)
+      IO.inspect(query, label: "Query: ")
 
       assert {:ok,
               [
@@ -82,7 +83,20 @@ defmodule QueryEngineTest do
                 %Types.Triples{subject: :camille, predicate: :works_with, object: :bob},
                 %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
                 %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
-              ]}
+              ]} == QueryEngine.query(graph, query)
+    end
+
+    test "find variables", %{graph: graph} do
+      query = Query.find([:__any_var, :__any_other_var])
+      IO.inspect(query, label: "Query: ")
+
+      assert {:ok,
+              [
+                %Types.Triples{subject: :anna, predicate: :lives_with, object: :bob},
+                %Types.Triples{subject: :camille, predicate: :works_with, object: :bob},
+                %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
+                %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
+              ]} == QueryEngine.query(graph, query)
     end
 
     @tag :skip

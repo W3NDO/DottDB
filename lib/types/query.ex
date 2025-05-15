@@ -19,7 +19,7 @@ defmodule Types.Query do
   @spec find(atom() | list(atom())) :: Types.Query.t()
   def find(find),
     do: %__MODULE__{
-      find: find,
+      find: normalize_variable(find),
       where: nil,
       where_not: nil,
       or: nil
@@ -31,7 +31,7 @@ defmodule Types.Query do
         ) :: Types.Query.t()
   def find_where(find, where) do
     %__MODULE__{
-      find: find,
+      find: normalize_variable(find),
       where: normalize_pattern(where) |> pattern_to_triple,
       where_not: nil,
       or: nil
@@ -71,7 +71,7 @@ defmodule Types.Query do
         ) :: t()
   def q(find, where, where_not, oder),
     do: %__MODULE__{
-      find: find,
+      find: normalize_variable(find),
       where: normalize_pattern(where) |> pattern_to_triple(),
       where_not: normalize_pattern(where_not) |> pattern_to_triple(),
       or: normalize_pattern(oder) |> pattern_to_triple()
@@ -91,7 +91,25 @@ defmodule Types.Query do
     Enum.map(patterns, fn pattern -> normalize_pattern(pattern) end)
   end
 
-  defp is_user_variable?(part) do
+  def normalize_variable(parts) do
+    case is_list(parts) do
+      true ->
+        Enum.map(parts, fn part ->
+          case is_user_variable?(part) do
+            true -> %Types.PatternVariable{var: part}
+            false -> part
+          end
+        end)
+
+      false ->
+        case is_user_variable?(parts) do
+          true -> %Types.PatternVariable{var: parts}
+          false -> parts
+        end
+    end
+  end
+
+  def is_user_variable?(part) do
     case is_atom(part) and String.starts_with?(Atom.to_string(part), "__") do
       false -> false
       true -> true
