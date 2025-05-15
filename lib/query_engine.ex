@@ -31,7 +31,7 @@ defmodule QueryEngine do
 
         case Enum.empty?(res) do
           true -> {:no_results, []}
-          false -> {:ok, [res]}
+          false -> {:ok, res}
         end
 
       false ->
@@ -99,27 +99,46 @@ defmodule QueryEngine do
     end
   end
 
-  @spec match_on_query_struct(graph :: DottGraph, query :: Types.Query) :: list(Types.Triples) | nil
-  def match_on_query_struct(graph, %Types.Query{find: find_clause, where: nil, where_not: nil, or: nil}) do
-    find_match(graph, %{}, find_clause)
+  @spec match_on_query_struct(graph :: DottGraph, query :: Types.Query) ::
+          list(Types.Triples) | nil
+  def match_on_query_struct(graph, %Types.Query{
+        find: find_clause,
+        where: nil,
+        where_not: nil,
+        or: nil
+      }) do
+    find_match(graph, [], find_clause)
   end
 
-  def match_on_query_struct(graph, %Types.Query{find: find_clause, where: where_clause, where_not: nil, or: nil}) do
+  def match_on_query_struct(graph, %Types.Query{
+        find: find_clause,
+        where: where_clause,
+        where_not: nil,
+        or: nil
+      }) do
     IO.inspect(3)
     nil
   end
 
-  def match_on_query_struct(graph, %Types.Query{find: find_clause, where: nil, where_not: where_not_clause, or: nil}) do
+  def match_on_query_struct(graph, %Types.Query{
+        find: find_clause,
+        where: nil,
+        where_not: where_not_clause,
+        or: nil
+      }) do
     IO.inspect(2)
     nil
   end
 
-  def match_on_query_struct(graph, %Types.Query{find: find_clause, where: where_clause, where_not: where_not_clause, or: or_clause}) do
+  def match_on_query_struct(graph, %Types.Query{
+        find: find_clause,
+        where: where_clause,
+        where_not: where_not_clause,
+        or: or_clause
+      }) do
     IO.inspect(1)
     nil
   end
-
-
 
   def find_match(_graph, matches, []) do
     matches
@@ -130,15 +149,25 @@ defmodule QueryEngine do
     find_match(graph, new_matches, other_find_clauses)
   end
 
+  @spec find_match(
+          graph :: DottGraph,
+          matches :: list(),
+          find_clause :: atom() | Types.PatternVariable.t()
+        ) :: list(Types.Triples.t())
   def find_match(graph, matches, find_clause) do
-    Map.put(
-      matches,
-      find_clause,
-      Enum.filter(graph.triples, fn triple -> Types.Triples.has_value?(triple, find_clause) end)
-    )
-  end
+    case Types.PatternVariable.is_pattern_variable?(find_clause) do
+      true ->
+        graph.triples
 
-  def where_match(graph, patterns) do
-    match_pattern?(graph.triples, patterns)
+      false ->
+        [
+          Enum.filter(graph.triples, fn triple ->
+            Types.Triples.has_value?(triple, find_clause)
+          end)
+          | matches
+        ]
+        |> List.flatten()
+        |> Enum.uniq()
+    end
   end
 end

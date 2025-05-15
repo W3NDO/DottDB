@@ -55,13 +55,9 @@ defmodule QueryEngineTest do
 
       assert {:ok,
               [
-                %{
-                  anna: [
-                    %Types.Triples{subject: :anna, predicate: :lives_with, object: :bob},
-                    %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
-                    %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
-                  ]
-                }
+                %Types.Triples{subject: :anna, predicate: :lives_with, object: :bob},
+                %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
+                %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
               ]} == QueryEngine.query(graph, query)
     end
 
@@ -70,22 +66,13 @@ defmodule QueryEngineTest do
 
       assert {:ok,
               [
-                %{
-                  anna: [
-                    %Types.Triples{subject: :anna, predicate: :lives_with, object: :bob},
-                    %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
-                    %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
-                  ],
-                  camille: [
-                    %Types.Triples{subject: :camille, predicate: :works_with, object: :bob},
-                    %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
-                    %Types.Triples{subject: :anna, predicate: :knows, object: :camille}
-                  ]
-                }
+                %Types.Triples{object: :bob, predicate: :works_with, subject: :camille},
+                %Types.Triples{object: :anna, predicate: :knows, subject: :camille},
+                %Types.Triples{object: :camille, predicate: :knows, subject: :anna},
+                %Types.Triples{object: :bob, predicate: :lives_with, subject: :anna}
               ]} == QueryEngine.query(graph, query)
     end
 
-    @tag :skip
     test "find variables" do
       query = Query.find(:__any_var)
 
