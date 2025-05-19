@@ -18,7 +18,7 @@ defmodule DottGraph do
           triples: list(Triples.t()) | nil
         }
 
-  @enforce_keys [:nodes, :edges]
+  @enforce_keys [:nodes, :edges, :triples]
   defstruct name: nil,
             nodes: [],
             edges: [],
@@ -44,6 +44,26 @@ defmodule DottGraph do
   """
   @spec new(name :: String.t(), triples :: list(triple_arg)) :: %DottGraph{}
 
+  def new(name, [subject, predicate, object]) do
+    temp_graph = %__MODULE__{
+      name: name,
+      triples: [
+        %Types.Triples{
+          subject: subject,
+          predicate: predicate,
+          object: object
+        }
+      ],
+      nodes: [],
+      edges: []
+    }
+
+    nodes = get_nodes(temp_graph)
+    edges = get_edges(temp_graph)
+
+    %__MODULE__{temp_graph | nodes: nodes, edges: edges}
+  end
+
   def new(name, [[subject, predicate, object] | rest_of_triples]) do
     temp_graph = %__MODULE__{
       name: name,
@@ -63,26 +83,6 @@ defmodule DottGraph do
 
     %__MODULE__{temp_graph | nodes: nodes, edges: edges}
     |> add_triples(rest_of_triples)
-  end
-
-  def new(name, [subject, predicate, object]) do
-    temp_graph = %__MODULE__{
-      name: name,
-      triples: [
-        %Types.Triples{
-          subject: subject,
-          predicate: predicate,
-          object: object
-        }
-      ],
-      nodes: [],
-      edges: []
-    }
-
-    nodes = get_nodes(temp_graph)
-    edges = get_edges(temp_graph)
-
-    %__MODULE__{temp_graph | nodes: nodes, edges: edges}
   end
 
   @spec new(name :: String.t(), nodes :: list(DottNode.t()), edges :: list(DottEdge.t())) ::
@@ -168,7 +168,7 @@ defmodule DottGraph do
           DottEdge.new(edge_label, src_node, dest_node, attributes, type)
       end)
 
-    temp_graph = %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges}
+    temp_graph = %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges, triples: []}
     triples = get_triples(temp_graph)
 
     %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges, triples: triples}
@@ -253,7 +253,7 @@ defmodule DottGraph do
       |> Enum.uniq()
       |> Enum.map(fn label -> DottNode.new(label) end)
 
-    temp_graph = %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges}
+    temp_graph = %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges, triples: []}
 
     triples = get_triples(temp_graph)
 
@@ -312,6 +312,8 @@ defmodule DottGraph do
   def add_triples(graph, [subject, predicate, object]) do
     graph
     |> add_triple([subject, predicate, object])
+    |> get_edges()
+    |> get_nodes()
   end
 
   @spec get_nodes(graph :: t()) :: list(DottNode.t())
