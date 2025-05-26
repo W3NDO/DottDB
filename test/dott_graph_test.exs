@@ -1,6 +1,7 @@
 defmodule DottGraphTest do
   use ExUnit.Case
   doctest DottGraph
+  alias DottGraph, as: Graph
 
   describe "Building a graph object with nodes & edges (new/3)" do
     test "Creates a new DottGraph object" do
@@ -247,6 +248,20 @@ defmodule DottGraphTest do
 
       assert true =
                Enum.all?(actual_triples, fn triple -> Enum.member?(expected_triples, triple) end)
+    end
+
+    test "add_triples/2 with multiple sets of triples, similar node names and edge names" do
+      graph = Graph.new("Uniqueness Graph", [
+        [:anna, :knows, :camille],
+        [:camille, :knows, :anna],
+        [:anna, :lives_with, :camille]
+      ])
+
+      expected_triples = [
+        %Types.Triples{subject: :anna, predicate: :knows, object: :camille},
+        %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
+        %Types.Triples{subject: :anna, predicate: :works_for, object: :camille}
+      ]
     end
   end
 end
