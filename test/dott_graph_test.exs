@@ -148,11 +148,12 @@ defmodule DottGraphTest do
                  %Types.Triples{subject: :alice, predicate: :knows, object: :bob}
                ],
                nodes: [
-                 %DottNode{attributes: %{}, label: :alice, meta: %{read: 0, write: 0}},
-                 %DottNode{attributes: %{}, label: :bob, meta: %{read: 0, write: 0}}
+                 %DottNode{attributes: %{}, label: :alice, id: 1, meta: %{read: 0, write: 0}},
+                 %DottNode{attributes: %{}, label: :bob, id: 2, meta: %{read: 0, write: 0}}
                ],
                edges: [
                  %DottEdge{
+                   id: 1,
                    attributes: %{},
                    label: :knows,
                    meta: %{read: 0, write: 0},
@@ -160,8 +161,59 @@ defmodule DottGraphTest do
                    src_node_label: :alice,
                    dest_node_label: :bob
                  }
-               ]
+               ],
+               meta: %{edge_count: 1, node_count: 2}
              } == DottGraph.new("test graph", [:alice, :knows, :bob])
+    end
+
+    test "Accept a list of triples and build nodes & edges from them & update the meta" do
+      assert %DottGraph{
+               edges: [
+                 %DottEdge{
+                   attributes: %{},
+                   dest_node_label: :bob,
+                   id: 1,
+                   label: :lives_with,
+                   meta: %{read: 0, write: 0},
+                   src_node_label: :alice,
+                   type: :undirected
+                 },
+                 %DottEdge{
+                   attributes: %{},
+                   id: 2,
+                   label: :knows,
+                   meta: %{read: 0, write: 0},
+                   type: :undirected,
+                   src_node_label: :bob,
+                   dest_node_label: :alice
+                 },
+                 %DottEdge{
+                   attributes: %{},
+                   id: 3,
+                   label: :knows,
+                   meta: %{read: 0, write: 0},
+                   type: :undirected,
+                   src_node_label: :alice,
+                   dest_node_label: :bob
+                 }
+               ],
+               meta: %{edge_count: 3, node_count: 2},
+               name: "test graph",
+               nodes: [
+                 %DottNode{label: :alice, attributes: %{}, id: 1, meta: %{read: 0, write: 0}},
+                 %DottNode{label: :bob, attributes: %{}, id: 2, meta: %{read: 0, write: 0}}
+               ],
+               triples: [
+                 %Types.Triples{object: :bob, predicate: :lives_with, subject: :alice},
+                 %Types.Triples{subject: :bob, predicate: :knows, object: :alice},
+                 %Types.Triples{subject: :alice, predicate: :knows, object: :bob}
+               ]
+             } ==
+               DottGraph.new("test graph", [
+                 [:alice, :knows, :bob],
+                 [:bob, :knows, :alice],
+                 [:alice, :lives_with, :bob]
+               ])
     end
   end
 

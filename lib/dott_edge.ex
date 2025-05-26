@@ -3,13 +3,16 @@ defmodule DottEdge do
   This will define types and behaviours for edges
   """
 
+  # @derive {Inspect, only: [:label, :type, :src_node_label, :dest_node_label, :attributes, :id]}
+
   @type t :: %__MODULE__{
           label: String.t(),
           type: atom(),
           src_node_label: String.t(),
           dest_node_label: String.t(),
           attributes: Enumerable.t() | nil,
-          meta: Enumerable.t()
+          meta: Enumerable.t(),
+          id: integer() | nil
         }
 
   defstruct label: nil,
@@ -17,7 +20,8 @@ defmodule DottEdge do
             dest_node_label: nil,
             type: nil,
             attributes: %{},
-            meta: %{}
+            meta: %{},
+            id: nil
 
   @callback new(
               label :: String.t(),
@@ -48,7 +52,13 @@ defmodule DottEdge do
       dest_node_label: dest_node_label,
       type: type,
       attributes: attributes,
-      meta: %{read: 0, write: 0}
+      meta: %{read: 0, write: 0},
+      id: nil
     }
+  end
+
+  @spec add_idx(edge :: t(), idx :: integer()) :: t()
+  def add_idx(edge, idx) do
+    %__MODULE__{edge | id: idx}
   end
 end

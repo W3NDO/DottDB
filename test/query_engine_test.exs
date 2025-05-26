@@ -75,7 +75,6 @@ defmodule QueryEngineTest do
 
     test "find variable", %{graph: graph} do
       query = Query.find(:__any_var)
-      IO.inspect(query, label: "Query: ")
 
       assert {:ok,
               [
@@ -88,7 +87,6 @@ defmodule QueryEngineTest do
 
     test "find variables", %{graph: graph} do
       query = Query.find([:__any_var, :__any_other_var])
-      IO.inspect(query, label: "Query: ")
 
       assert {:ok,
               [
