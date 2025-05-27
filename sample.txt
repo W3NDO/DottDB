@@ -1,0 +1,10 @@
+[:anna, :knows, :camille]
+[:camille, :knows, :anna] 
+
+-> 2 nodes(:anna, :camille), 1 bidirectional edge(:knows)
+
+[:anna, :knows, :camille]
+[:camille, :knows, :anna]
+[:anna, :lives_with, :camille]
+
+-> 2 nodes(:anna, :camille), 1 bidirectional edge(:knows), and 1 unidirectional edge(:lives_with)

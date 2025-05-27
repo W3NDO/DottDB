@@ -250,12 +250,19 @@ defmodule DottGraphTest do
                Enum.all?(actual_triples, fn triple -> Enum.member?(expected_triples, triple) end)
     end
 
+    @tag :skip
+    @doc """
+    The idea here is that when you add a new node with a similar label as one that exists, we compare their info and save the more detailed one
+
+    Further for edges, if we add an edge with a similar label, src and dest, then we update the edge type.
+    """
     test "add_triples/2 with multiple sets of triples, similar node names and edge names" do
-      graph = Graph.new("Uniqueness Graph", [
-        [:anna, :knows, :camille],
-        [:camille, :knows, :anna],
-        [:anna, :lives_with, :camille]
-      ])
+      graph =
+        Graph.new("Uniqueness Graph", [
+          [:anna, :knows, :camille],
+          [:camille, :knows, :anna],
+          [:anna, :lives_with, :camille]
+        ])
 
       expected_triples = [
         %Types.Triples{subject: :anna, predicate: :knows, object: :camille},

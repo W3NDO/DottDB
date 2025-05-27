@@ -296,6 +296,9 @@ defmodule DottGraph do
     %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges, triples: triples}
   end
 
+  @doc """
+    Add a single triple to the triples list in the graph struct
+  """
   defp add_triple(graph, [subject, predicate, object]) do
     %DottGraph{
       graph
@@ -337,15 +340,18 @@ defmodule DottGraph do
     |> get_edges_from_triples()
   end
 
+  # expected 2nd arg -> [[:anne, :knows, :camille], [:camille, :knows, :anne]]
   def add_triples(graph, [[s, p, o] | rest_of_triples]) do
     graph
     |> add_triple([s, p, o])
     |> add_triples(rest_of_triples)
   end
 
+  # expected 2nd arg -> [:anne, :knows, :camille]
   def add_triples(graph, [subject, predicate, object]) do
     graph
     |> add_triple([subject, predicate, object])
+    |> add_triples([])
   end
 
   @doc """
@@ -388,6 +394,16 @@ defmodule DottGraph do
         [s, p, o]
       end)
       |> Enum.map(fn [ts, tp, to] -> DottEdge.new(tp, ts, to) end)
+      |> Enum.reject(fn %DottEdge{label: label, src_node_label: src, dest_node_label: dest} ->
+        Enum.map(graph.edges, fn %DottEdge{
+                                   label: existing_label,
+                                   src_node_label: existing_src,
+                                   dest_node_label: existing_dest
+                                 } ->
+          [existing_label, existing_src, existing_dest]
+        end)
+        |> Enum.member?([label, src, dest])
+      end)
       |> then(fn edges ->
         new_edge_count = length(edges) + get_edge_count(graph)
 
