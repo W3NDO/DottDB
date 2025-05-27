@@ -5,6 +5,8 @@ defmodule DottGraph do
   alias Types.Triples
   # @filetypes ["csv", "json"]
 
+  # @derive {Inspect, only: [:name, :nodes, :edges, :triples]}
+
   @type triple_arg :: {
           subject :: String.t() | atom(),
           predicate :: String.t() | atom(),
@@ -15,14 +17,16 @@ defmodule DottGraph do
           name: String.t(),
           nodes: list(DottNode.t()) | nil,
           edges: list(DottEdge.t()) | nil,
-          triples: list(Triples.t()) | nil
+          triples: list(Triples.t()) | nil,
+          meta: Enumerable.t()
         }
 
-  @enforce_keys [:nodes, :edges]
+  @enforce_keys [:nodes, :edges, :triples]
   defstruct name: nil,
             nodes: [],
             edges: [],
-            triples: []
+            triples: [],
+            meta: %{node_count: 0, edge_count: 0}
 
   @doc """
     DottGraph.new/2 will take in a graph name and a triple or a list of triples and return a graph with those triples.
@@ -58,10 +62,7 @@ defmodule DottGraph do
       edges: []
     }
 
-    nodes = get_nodes(temp_graph)
-    edges = get_edges(temp_graph)
-
-    %__MODULE__{temp_graph | nodes: nodes, edges: edges}
+    temp_graph
     |> add_triples(rest_of_triples)
   end
 
@@ -79,10 +80,7 @@ defmodule DottGraph do
       edges: []
     }
 
-    nodes = get_nodes(temp_graph)
-    edges = get_edges(temp_graph)
-
-    %__MODULE__{temp_graph | nodes: nodes, edges: edges}
+    temp_graph |> get_nodes_from_triples |> get_edges_from_triples()
   end
 
   @spec new(name :: String.t(), nodes :: list(DottNode.t()), edges :: list(DottEdge.t())) ::
@@ -92,7 +90,7 @@ defmodule DottGraph do
   end
 
   @doc """
-    Creates a new Graph object.
+    Creates a new Graph object. Accepts a graph name, node list and edge list
 
     Returns`%DottGraph{}`
 
@@ -143,6 +141,8 @@ defmodule DottGraph do
     }
   """
   def new(graph_name, nodes, edges) do
+    graph = %__MODULE__{name: graph_name, nodes: [], edges: [], triples: []}
+
     dott_nodes =
       nodes
       |> Enum.map(fn [node_label, attributes] ->
@@ -154,6 +154,8 @@ defmodule DottGraph do
             DottNode.new(node_label, attributes)
         end
       end)
+
+    Enum.each(dott_nodes, fn node -> add_node(graph, node) end)
 
     dott_edges =
       edges
@@ -168,10 +170,14 @@ defmodule DottGraph do
           DottEdge.new(edge_label, src_node, dest_node, attributes, type)
       end)
 
-    temp_graph = %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges}
+    Enum.each(dott_edges, fn edge -> add_edge(graph, edge) end)
+
+    temp_graph = %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges, triples: []}
     triples = get_triples(temp_graph)
 
     %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges, triples: triples}
+    # |> set_node_count(length(dott_nodes))
+    # |> set_edge_count(length(dott_edges))
   end
 
   @doc """
@@ -189,6 +195,36 @@ defmodule DottGraph do
 
     %{nodes: 2, edges: 2}
   """
+
+  @doc """
+    Insert a node into the graph object
+  """
+  @spec add_node(graph :: t(), node :: DottNode.t()) :: t()
+  def add_node(graph, node) do
+    new_node_count = graph.meta.node_count + 1
+    node = %DottNode{node | id: new_node_count}
+
+    %__MODULE__{
+      graph
+      | nodes: [node | graph.nodes],
+        meta: %{graph.meta | node_count: new_node_count}
+    }
+  end
+
+  @doc """
+    Insert an edge into the graph object
+  """
+  @spec add_edge(graph :: t(), edge :: DottEdge.t()) :: t()
+  def add_edge(graph, edge) do
+    new_edge_count = graph.meta.edge_count + 1
+    edge = %DottEdge{edge | id: new_edge_count}
+
+    %__MODULE__{
+      graph
+      | edges: [edge | graph.edges],
+        meta: %{graph.meta | edge_count: new_edge_count}
+    }
+  end
 
   def info(graph) do
     %{nodes: length(graph.nodes), edges: length(graph.edges)}
@@ -253,23 +289,22 @@ defmodule DottGraph do
       |> Enum.uniq()
       |> Enum.map(fn label -> DottNode.new(label) end)
 
-    temp_graph = %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges}
+    temp_graph = %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges, triples: []}
 
     triples = get_triples(temp_graph)
 
     %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges, triples: triples}
   end
 
+  @doc """
+    Add a single triple to the triples list in the graph struct
+  """
   defp add_triple(graph, [subject, predicate, object]) do
     %DottGraph{
       graph
       | triples: [
           %Triples{subject: subject, predicate: predicate, object: object} | graph.triples
-        ],
-        # [DottNode.new(subject), DottNode.new(object) | graph.nodes] |> Enum.uniq(),
-        nodes: [],
-        # [DottEdge.new(predicate, subject, object) | graph.edges]
-        edges: []
+        ]
     }
   end
 
@@ -301,56 +336,128 @@ defmodule DottGraph do
 
   def add_triples(graph, []) do
     graph
+    |> get_nodes_from_triples()
+    |> get_edges_from_triples()
   end
 
+  # expected 2nd arg -> [[:anne, :knows, :camille], [:camille, :knows, :anne]]
   def add_triples(graph, [[s, p, o] | rest_of_triples]) do
     graph
     |> add_triple([s, p, o])
     |> add_triples(rest_of_triples)
   end
 
+  # expected 2nd arg -> [:anne, :knows, :camille]
   def add_triples(graph, [subject, predicate, object]) do
     graph
     |> add_triple([subject, predicate, object])
+    |> add_triples([])
   end
 
-  @spec get_nodes(graph :: t()) :: list(DottNode.t())
-  def get_nodes(graph) do
-    cond do
-      graph.nodes == [] and graph.triples != [] ->
-        Enum.map(graph.triples, fn %Triples{subject: s, object: o} ->
-          [DottNode.new(s), DottNode.new(o)]
-        end)
-        |> List.flatten()
+  @doc """
+  Add nodes to the graph object from the triples in the graph object.
+  """
+  @spec get_nodes_from_triples(graph :: t()) :: t()
+  def get_nodes_from_triples(graph) do
+    {new_nodes, node_count} =
+      Enum.map(graph.triples, fn %Triples{subject: s, predicate: _p, object: o} ->
+        [s, o]
+      end)
+      |> List.flatten()
+      |> Enum.uniq()
+      |> then(fn node_labels ->
+        node_count = length(node_labels) + get_node_count(graph)
 
-      graph.nodes != [] ->
-        graph.nodes
+        new_nodes =
+          node_labels
+          |> Enum.map(&DottNode.new/1)
+          |> Enum.with_index(get_node_count(graph) + 1)
+          |> Enum.map(fn {node, idx} -> DottNode.add_idx(node, idx) end)
+
+        {new_nodes, node_count}
+      end)
+
+    case graph.triples do
+      [] ->
+        %__MODULE__{graph | nodes: new_nodes}
+
+      _ ->
+        %__MODULE__{graph | nodes: graph.nodes ++ new_nodes}
+        |> set_node_count(node_count)
     end
   end
 
-  @spec get_edges(graph :: t()) :: list(DottEdge.t())
-  def get_edges(graph) do
-    cond do
-      graph.nodes == [] and graph.triples != [] ->
-        Enum.map(graph.triples, fn %Triples{subject: s, predicate: p, object: o} ->
-          DottEdge.new(p, s, o)
+  @spec get_edges_from_triples(graph :: t()) :: t()
+  def get_edges_from_triples(graph) do
+    {new_edges, new_edge_count} =
+      Enum.map(graph.triples, fn %Triples{subject: s, predicate: p, object: o} ->
+        [s, p, o]
+      end)
+      |> Enum.map(fn [ts, tp, to] -> DottEdge.new(tp, ts, to) end)
+      |> Enum.reject(fn %DottEdge{label: label, src_node_label: src, dest_node_label: dest} ->
+        Enum.map(graph.edges, fn %DottEdge{
+                                   label: existing_label,
+                                   src_node_label: existing_src,
+                                   dest_node_label: existing_dest
+                                 } ->
+          [existing_label, existing_src, existing_dest]
         end)
+        |> Enum.member?([label, src, dest])
+      end)
+      |> then(fn edges ->
+        new_edge_count = length(edges) + get_edge_count(graph)
 
-      graph.edges != [] ->
-        graph.edges
-    end
+        new_edges =
+          edges
+          |> Enum.with_index(get_edge_count(graph) + 1)
+          |> Enum.map(fn {edge, idx} -> DottEdge.add_idx(edge, idx) end)
+
+        {new_edges, new_edge_count}
+      end)
+
+    %__MODULE__{graph | edges: graph.edges ++ new_edges}
+    |> set_edge_count(new_edge_count)
   end
 
   @spec get_triples(graph :: t()) :: list(Triples.t())
   def get_triples(graph) do
     cond do
-      graph.triples != [] ->
-        graph.triples
-
       graph.edges != [] ->
         Enum.map(graph.edges, fn %DottEdge{label: p, src_node_label: s, dest_node_label: o} ->
           %Triples{predicate: p, subject: s, object: o}
         end)
     end
+  end
+
+  @doc """
+  Returns the number of nodes in the graph
+  """
+  @spec get_node_count(graph :: t()) :: integer()
+  def get_node_count(graph) do
+    graph.meta.node_count
+  end
+
+  @doc """
+  Returns the number of edges in the graph
+  """
+  @spec get_edge_count(graph :: t()) :: integer()
+  def get_edge_count(graph) do
+    graph.meta.edge_count
+  end
+
+  @doc """
+  Updates the node count in the graph
+  """
+  @spec set_node_count(graph :: t(), count :: integer()) :: t()
+  def set_node_count(graph, new_count) do
+    %__MODULE__{graph | meta: %{graph.meta | node_count: new_count}}
+  end
+
+  @doc """
+  Updates the edge count in the graph
+  """
+  @spec set_edge_count(graph :: t(), count :: integer()) :: t()
+  def set_edge_count(graph, new_count) do
+    %__MODULE__{graph | meta: %{graph.meta | edge_count: new_count}}
   end
 end

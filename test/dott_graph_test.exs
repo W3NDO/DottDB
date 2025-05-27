@@ -1,6 +1,7 @@
 defmodule DottGraphTest do
   use ExUnit.Case
   doctest DottGraph
+  alias DottGraph, as: Graph
 
   describe "Building a graph object with nodes & edges (new/3)" do
     test "Creates a new DottGraph object" do
@@ -148,11 +149,12 @@ defmodule DottGraphTest do
                  %Types.Triples{subject: :alice, predicate: :knows, object: :bob}
                ],
                nodes: [
-                 %DottNode{attributes: %{}, label: :alice, meta: %{read: 0, write: 0}},
-                 %DottNode{attributes: %{}, label: :bob, meta: %{read: 0, write: 0}}
+                 %DottNode{attributes: %{}, label: :alice, id: 1, meta: %{read: 0, write: 0}},
+                 %DottNode{attributes: %{}, label: :bob, id: 2, meta: %{read: 0, write: 0}}
                ],
                edges: [
                  %DottEdge{
+                   id: 1,
                    attributes: %{},
                    label: :knows,
                    meta: %{read: 0, write: 0},
@@ -160,8 +162,59 @@ defmodule DottGraphTest do
                    src_node_label: :alice,
                    dest_node_label: :bob
                  }
-               ]
+               ],
+               meta: %{edge_count: 1, node_count: 2}
              } == DottGraph.new("test graph", [:alice, :knows, :bob])
+    end
+
+    test "Accept a list of triples and build nodes & edges from them & update the meta" do
+      assert %DottGraph{
+               edges: [
+                 %DottEdge{
+                   attributes: %{},
+                   dest_node_label: :bob,
+                   id: 1,
+                   label: :lives_with,
+                   meta: %{read: 0, write: 0},
+                   src_node_label: :alice,
+                   type: :undirected
+                 },
+                 %DottEdge{
+                   attributes: %{},
+                   id: 2,
+                   label: :knows,
+                   meta: %{read: 0, write: 0},
+                   type: :undirected,
+                   src_node_label: :bob,
+                   dest_node_label: :alice
+                 },
+                 %DottEdge{
+                   attributes: %{},
+                   id: 3,
+                   label: :knows,
+                   meta: %{read: 0, write: 0},
+                   type: :undirected,
+                   src_node_label: :alice,
+                   dest_node_label: :bob
+                 }
+               ],
+               meta: %{edge_count: 3, node_count: 2},
+               name: "test graph",
+               nodes: [
+                 %DottNode{label: :alice, attributes: %{}, id: 1, meta: %{read: 0, write: 0}},
+                 %DottNode{label: :bob, attributes: %{}, id: 2, meta: %{read: 0, write: 0}}
+               ],
+               triples: [
+                 %Types.Triples{object: :bob, predicate: :lives_with, subject: :alice},
+                 %Types.Triples{subject: :bob, predicate: :knows, object: :alice},
+                 %Types.Triples{subject: :alice, predicate: :knows, object: :bob}
+               ]
+             } ==
+               DottGraph.new("test graph", [
+                 [:alice, :knows, :bob],
+                 [:bob, :knows, :alice],
+                 [:alice, :lives_with, :bob]
+               ])
     end
   end
 
@@ -195,6 +248,27 @@ defmodule DottGraphTest do
 
       assert true =
                Enum.all?(actual_triples, fn triple -> Enum.member?(expected_triples, triple) end)
+    end
+
+    @tag :skip
+    @doc """
+    The idea here is that when you add a new node with a similar label as one that exists, we compare their info and save the more detailed one
+
+    Further for edges, if we add an edge with a similar label, src and dest, then we update the edge type.
+    """
+    test "add_triples/2 with multiple sets of triples, similar node names and edge names" do
+      graph =
+        Graph.new("Uniqueness Graph", [
+          [:anna, :knows, :camille],
+          [:camille, :knows, :anna],
+          [:anna, :lives_with, :camille]
+        ])
+
+      expected_triples = [
+        %Types.Triples{subject: :anna, predicate: :knows, object: :camille},
+        %Types.Triples{subject: :camille, predicate: :knows, object: :anna},
+        %Types.Triples{subject: :anna, predicate: :works_for, object: :camille}
+      ]
     end
   end
 end

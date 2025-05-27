@@ -25,3 +25,4 @@ dott_db-*.tar
 # ASDF generates .tool_versions when setting which tools to use. Lets ignore that too
 .tool_versions
 
+/sample.txt

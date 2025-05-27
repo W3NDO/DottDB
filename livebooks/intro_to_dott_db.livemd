@@ -1,0 +1,75 @@
+<!-- livebook:{"autosave_interval_s":30} -->
+
+# Intro To DottDb
+
+```elixir
+Mix.install([
+  {:dott_db, path: "~/DottDb"}
+])
+```
+
+## Pre-Requisites
+
+To understand what DottGraph does, we look into a couple graph theory and knowledge graph concepts.
+
+In no particular order, these are:
+
+1. Graphs
+2. Nodes
+3. Edges
+4. Triples
+5. Knowledge Graphs
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Graphs
+
+A graph is a collection of nodes and edges. There is a more technical description for this, but this will suffice for now.
+
+### Nodes
+
+A node is an element in a graph.
+
+### Edge
+
+An edge is a link between nodes in a graph.
+
+### Knowledge Graphs
+
+A knowledge graph is a structured representation of information in the form of a graph, where entities (real-world objects or concepts) are represented as nodes, and relationships between them are represented as edges.
+
+### Triples
+
+A triple is the basic unit of data that represents a fact in a knowledge graph. It often follows the structure `[:subject, :predicate, :object]`.
+
+<!-- livebook:{"break_markdown":true} -->
+
+### Building a Basic Graph
+
+DottDb at it's core is an in-memory graph database. As such the most basic stuct we defined is a Graph struct. This supports edges, nodes and triples.
+
+We have 2 ways to build a graph; `new/2` and `new/3` The difference here is that `new/2` will take in the name of the graph and a triple, or a list of triples and build the graph from that, while `new/3` will take in the name of the graph, a list of nodes and a list of edges to build the graph.
+
+We represent a triple as a list of 3 atoms meaning that these are valid triples
+
+```
+    [:anna, :knows, :camille]
+    [:"Jose Valim", :built, :"elixir"]
+```
+
+```elixir
+# new/2
+DottGraph.new("Example Graph", [[:anna, :knows, :camille], 
+  [:"Jose Valim", :built, :elixir]])
+```
+
+```elixir
+# new/3
+node1 = DottNode.new("anna")
+node2 = DottNode.new("camille")
+edge = DottEdge.new("knows", "anna", "camille")
+
+DottGraph.new("Example Graph 2", [node1, node2], [edge])
+```
+
+### Triples
