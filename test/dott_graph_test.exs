@@ -154,13 +154,15 @@ defmodule DottGraphTest do
                ],
                edges: [
                  %DottEdge{
-                   id: 1,
                    attributes: %{},
+                   dest_node_id: 2,
+                   dest_node_label: :bob,
+                   id: 1,
                    label: :knows,
                    meta: %{read: 0, write: 0},
-                   type: :undirected,
+                   src_node_id: 1,
                    src_node_label: :alice,
-                   dest_node_label: :bob
+                   type: :undirected
                  }
                ],
                meta: %{edge_count: 1, node_count: 2}
@@ -172,30 +174,36 @@ defmodule DottGraphTest do
                edges: [
                  %DottEdge{
                    attributes: %{},
+                   dest_node_id: 2,
                    dest_node_label: :bob,
                    id: 1,
                    label: :lives_with,
                    meta: %{read: 0, write: 0},
+                   src_node_id: 1,
                    src_node_label: :alice,
                    type: :undirected
                  },
                  %DottEdge{
                    attributes: %{},
+                   dest_node_id: 1,
+                   dest_node_label: :alice,
                    id: 2,
                    label: :knows,
                    meta: %{read: 0, write: 0},
-                   type: :undirected,
+                   src_node_id: 2,
                    src_node_label: :bob,
-                   dest_node_label: :alice
+                   type: :undirected
                  },
                  %DottEdge{
                    attributes: %{},
+                   dest_node_id: 2,
+                   dest_node_label: :bob,
                    id: 3,
                    label: :knows,
                    meta: %{read: 0, write: 0},
-                   type: :undirected,
+                   src_node_id: 1,
                    src_node_label: :alice,
-                   dest_node_label: :bob
+                   type: :undirected
                  }
                ],
                meta: %{edge_count: 3, node_count: 2},

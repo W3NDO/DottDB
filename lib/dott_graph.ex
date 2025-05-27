@@ -178,6 +178,7 @@ defmodule DottGraph do
 
     %DottGraph{name: graph_name, nodes: dott_nodes, edges: dott_edges, triples: triples}
     |> validate_edges()
+
     # |> set_node_count(length(dott_nodes))
     # |> set_edge_count(length(dott_edges))
   end
@@ -234,18 +235,19 @@ defmodule DottGraph do
 
   # Updates the src_node_id and src_dest_id for all the edges
   defp validate_edges(graph) do
-    nodes_with_id = Enum.reduce(graph.nodes, %{}, fn node, acc ->
-      Map.put(acc, node.label, node.id)
-    end)
+    nodes_with_id =
+      Enum.reduce(graph.nodes, %{}, fn node, acc ->
+        Map.put(acc, node.label, node.id)
+      end)
 
-    new_edges = Enum.map(graph.edges, fn edge ->
-      src_id = Map.get(nodes_with_id, edge.src_node_label)
-      dest_id = Map.get(nodes_with_id, edge.dest_node_label)
-      %DottEdge{ edge | src_node_id: src_id, dest_node_id: dest_id}
-    end)
+    new_edges =
+      Enum.map(graph.edges, fn edge ->
+        src_id = Map.get(nodes_with_id, edge.src_node_label)
+        dest_id = Map.get(nodes_with_id, edge.dest_node_label)
+        %DottEdge{edge | src_node_id: src_id, dest_node_id: dest_id}
+      end)
 
     %__MODULE__{graph | edges: new_edges}
-
   end
 
   @doc """
