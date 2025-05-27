@@ -157,7 +157,6 @@ defmodule QueryEngine do
   def find_match(graph, matches, find_clause) do
     case Types.PatternVariable.is_pattern_variable?(find_clause) do
       true ->
-        IO.inspect("Is tuple", label: "Pattern Var")
         graph.triples
 
       false ->
