@@ -10,6 +10,8 @@ defmodule DottEdge do
           type: atom(),
           src_node_label: String.t(),
           dest_node_label: String.t(),
+          src_node_id: integer() | nil,
+          dest_node_label: integer() | nil,
           attributes: Enumerable.t() | nil,
           meta: Enumerable.t(),
           id: integer() | nil
@@ -18,6 +20,8 @@ defmodule DottEdge do
   defstruct label: nil,
             src_node_label: nil,
             dest_node_label: nil,
+            src_node_id: nil,
+            dest_node_id: nil,
             type: nil,
             attributes: %{},
             meta: %{},
@@ -45,11 +49,23 @@ defmodule DottEdge do
     raise ArgumentError, message: "Edge label must be present"
   end
 
+  @spec new(String.t(), String.t(), String.t(), Enumerable.t(), atom()) :: t()
+  def new(_label, nil, _dest, _attributes, _type) do
+    raise ArgumentError, message: "Source Node label must be present"
+  end
+
+  @spec new(String.t(), String.t(), String.t(), Enumerable.t(), atom()) :: t()
+  def new(_label, _src, nil, _attributes, _type) do
+    raise ArgumentError, message: "Destination Node label must be present"
+  end
+
   def new(label, src_node_label, dest_node_label, attributes, type) do
     %DottEdge{
       label: label,
       src_node_label: src_node_label,
       dest_node_label: dest_node_label,
+      src_node_id: nil,
+      dest_node_id: nil,
       type: type,
       attributes: attributes,
       meta: %{read: 0, write: 0},
